@@ -76,7 +76,15 @@ class LiteBot
 
         }
 
-        throw new RuntimeException("Unknown parse mode: {$parse_mode}");
+        throw new RuntimeException("Unknown parse mode: $parse_mode");
+    }
+
+    /**
+     * @return Client
+     */
+    public function getGuzzleHttpClient(): Client
+    {
+        return $this->guzzle_http_client;
     }
 
     /**
