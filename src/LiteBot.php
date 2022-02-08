@@ -80,6 +80,36 @@ class LiteBot
     }
 
     /**
+     * @param array $params
+     * @return array
+     */
+    protected static function processingParams(array $params): array
+    {
+        $result = [];
+        foreach ($params as $param_key => $param_value) {
+            if ($param_value === null) {
+                continue;
+            }
+
+            if (is_object($param_value)) {
+                $object_data = self::processingParams($param_value->getRequestArray());
+                if (!empty($object_data)) {
+                    $result[$param_key] = $object_data;
+                }
+            } elseif (is_array($param_value)) {
+                $array_data = self::processingParams($param_value);
+                if (!empty($array_data)) {
+                    $result[$param_key] = $array_data;
+                }
+            } else {
+                $result[$param_key] = $param_value;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * @return Client
      */
     public function getGuzzleHttpClient(): Client
@@ -115,9 +145,8 @@ class LiteBot
                 'Content-Type' => 'application/json',
                 'Accept-Encoding' => 'gzip',
             ],
-            RequestOptions::JSON => $parameters,
+            RequestOptions::JSON => self::processingParams($parameters),
         ]);
-
 
         $content = $response->getBody()->getContents();
         $content_decoded = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
